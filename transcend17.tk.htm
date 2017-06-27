@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Transcend 2016-17- KMC Mangalore Annual Magazine</title>
+  <meta name="theme-color" content="#474e5d">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+  <link href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script>
+  $(function() {
+  $('a[href*="#"]:not([href="#"])').click(function() {
+    if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+      var target = $(this.hash);
+      target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+      if (target.length) {
+        $('html, body').animate({
+          scrollTop: target.offset().top
+        }, 1000);
+        return false;
+      }
+    }
+  });
+});
+</script>
+  <style>
+.bg-1 { 
+    background-color: #1abc9c; /* Green */
+    color: #ffffff;
+}
+.bg-2 { 
+    background-color: #474e5d; /* Dark Blue */
+    color: #ffffff;
+}
+.bg-3 { 
+    background-color: #ffffff; /* White */
+    color: #555555;
+}
+.bg-4 { 
+    background-color: #2f2f2f;
+    color: #ffffff;
+}
+.container-fluid {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.navbar {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border: 0;
+    border-radius: 0;
+    margin-bottom: 0;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+.navbar-nav li a:hover {
+    color: #1abc9c !important;
+}
+
+
+
+p {font-size: 16px;}
+.margin {margin-bottom: 45px;}
+
+h2 {
+      font-size: 24px;
+      text-transform: uppercase;
+      color: #303030;
+      font-weight: 600;
+      margin-bottom: 30px;
+}
+h4 {
+      font-size: 19px;
+      line-height: 1.375em;
+      color: #303030;
+      font-weight: 400;
+      margin-bottom: 30px;
+}
+.logo-small {
+      color: #f4511e;
+      font-size: 50px;
+}
+.logo {
+      color: #f4511e;
+      font-size: 200px;
+}
+.glyphicon {
+      font-size: 20px;
+      margin-bottom: 20px;
+      color: #1abc9c;
+}
+.slideanim {visibility:hidden;}
+.slide {
+      animation-name: slide;
+      -webkit-animation-name: slide;	
+      animation-duration: 1s;	
+      -webkit-animation-duration: 1s;
+      visibility: visible;			
+}
+@keyframes slide {
+    0% {
+      opacity: 0;
+      -webkit-transform: translateY(70%);
+    } 
+    100% {
+      opacity: 1;
+      -webkit-transform: translateY(0%);
+    }	
+  }
+@-webkit-keyframes slide {
+    0% {
+      opacity: 0;
+      -webkit-transform: translateY(70%);
+    } 
+    100% {
+      opacity: 1;
+      -webkit-transform: translateY(0%);
+    }
+  }
+@media screen and (max-width: 768px) {
+    .col-sm-4 {
+      text-align: center;
+      margin: 25px 0;
+    }
+    .btn-lg {
+        width: 100%;
+        margin-bottom: 35px;
+    }
+  }
+@media screen and (max-width: 480px) {
+    .logo {
+        font-size: 150px;
+    }
+  }
+</style>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-100565906-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</head>
+<body>
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Transcend 2016-17</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#read">Read</a></li>
+        <li><a href="#watch">Watch</a></li>
+        <li><a href="#edfed">The EdFed</a></li>
+        <li><a href="#download">Download</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<div class="container-fluid bg-1 text-center">
+	<div class="embed-responsive embed-responsive-16by9">
+		<iframe class="embed-responsive-item" id="read" src='https://archive.org/stream/Transcend17/Transcend%20KMC%20Mangalore%2016-17?ui=embed#mode/1up'></iframe>
+	</div>
+  	<a href="#download"><h3>Download Links Below</h3></a>
+</div>
+<div class="container-fluid bg-2 text-center">
+  <h3 id="watch">Watch</h3>
+  <div class="col-sm-6">
+	  <div class="embed-responsive embed-responsive-16by9">
+	    	<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/dWu5xG8AwGc?rel=0&modestbranding=1" allowfullscreen></iframe>
+	  </div>
+  </div>
+  <div class="col-sm-6">
+	  <div class="embed-responsive embed-responsive-16by9">
+	    	<iframe class="embed-responsive-item" src="https://www.youtube.com/embed/Cd5wZrJgC5Q?rel=0&modestbranding=1" allowfullscreen></iframe>
+	  </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-6">
+      <img src="http://i.imgur.com/m6sLss6.jpg?1" class="img-responsive" style="width:100%" alt="Image">
+    </div>
+    <div class="col-sm-6">
+      <h2 id="edfed">The Editorial Federation</h2><br />
+      <p><strong>MEMBERS: </strong>The Ed board of Kasturba Medical College, Mangalore for the year 2016-17 comprised (from Left to Right): <p><br />
+      <p><strong>Standing: </strong>Sadhika Sood, Kriti Das, Aishwarya R, Varsha Chinta, Ojasvi Manchanda, J A Apurva, Reshma K Romanas, Ahamedunissa Sheriff</p>
+      <p><strong>High Seated: </strong>Siddharth Shankar, Abhinav Kumar,</p>
+      <p><strong>Front: </strong>Sonal Chopra, Anton Paulson, Ashwin Kola, T Aravind Raj, Rohit Bavihalli (Absent)</p>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid bg-3">
+  <h3 id="download" class="text-center">Download</h3>
+  <div class="col-sm-12">
+	  <div class="table-responsive">          
+		  <table class="table">
+		    <thead>
+		      <tr>
+		        <th>File Type</th>
+		        <th>Info</th>
+		        <th>Link</th>
+		      </tr>
+		    </thead>
+		    <tbody>
+		      <tr>
+		        <td>High Quality PDF</td>
+		        <td>271.5mb</td>
+		        <td><a href="https://archive.org/download/Transcend17/Transcend%20KMC%20Mangalore%2016-17.pdf" target="_blank">Link</a></td>
+		      </tr>
+		      <tr>
+		        <td>Compressed PDF</td>
+		        <td>88.2mb</td>
+		        <td><a href="https://archive.org/download/Transcend17.compressed/Transcend%20KMC%20Mangalore%2016-17.compressed.pdf" target="_blank">Link</a></td>
+		      </tr>
+		      <tr>
+		      	<td>Google Drive</td>
+		        <td>271.5mb</td>
+		        <td><a href="https://drive.google.com/open?id=0B_QEL6JQc0BqRnNYRDE2bFVZbTA" target="_blank">Link</a></td>
+		      </tr>
+		      <tr>
+		        <td>Torrent File</td>
+		        <td>271.5mb</td>
+		        <td><a href="https://archive.org/download/Transcend17/Transcend17_archive.torrent">Link</a></td>
+		      </tr>
+		      <tr>
+		        <td>Read Online</td>
+		        <td>Streamable PDF</td>
+		        <td><a href="https://archive.org/stream/Transcend17/Transcend%20KMC%20Mangalore%2016-17#page/n0/mode/1up" target="_blank">Link</a></td>
+		      </tr>
+		    </tbody>
+		  </table>
+	 </div>
+  </div>
+</div>
+<footer class="container-fluid bg-4 text-center">
+  <p>Copyleft. Made by <a href="http://spsdarj.org/contact.htm">Abhinav Kumar.</a> June, 2017</p> 
+</footer>
+</body>
+</html>
