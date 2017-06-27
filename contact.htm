@@ -1,0 +1,129 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+    <meta name="theme-color" content="#474e5d">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>	
+    <title>Abhinav Kumar (Quick Peek)</title>
+    <style type="text/css">a:hover {text-decoration: none;}</style>
+    <script>
+      var bar = true;
+      $(document).ready(function(){
+        $("#change-heading").click(function(){
+          if (bar){
+             $("#change-heading").text("Click to collapse");
+             bar= false;
+           }
+           else{
+             $("#change-heading").text("Click to expand");
+             bar= true;
+           }
+        });
+      });
+      
+      var foo = true;
+      $(document).ready(function(){
+        $("#change-text").click(function(){
+          if (foo){
+            $("#change-text").text("Hide the video by clicking this again!");
+            foo= false;
+          }
+          else{
+            $("#change-text").text("Check out the video below. Click This!");
+            foo= true;
+          }
+        });
+      });
+      
+      var foobar = true;
+      $(document).ready(function(){
+        $("#change-heading-2").click(function(){
+          if (foobar){
+             $("#change-heading-2").text("Click to collapse");
+             foobar= false;
+           }
+           else{
+             $("#change-heading-2").text("Click to expand");
+             foobar= true;
+           }
+        });
+      });
+      
+    </script>
+  </head>
+  <body class="text-justified">
+    <div class="col-sm-4"></div>
+    <div class="col-sm-4">
+      <div class="page-header">
+        <h1>My Internet Footprint</h1>
+      </div>
+      <div class="panel-group"  id="accordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <a data-toggle="collapse" href="#collapse1">
+              <h4 class="panel-title" id="change-heading">
+                Click to expand
+              </h4>
+            </a>
+          </div>
+          <div id="collapse1" class="panel-collapse collapse">
+            <ul class="list-group">
+              <a href="http://throwninthedeep.wordpress.com" target="_blank">
+                <li class="list-group-item">My Creative Writing Blog</li>
+              </a>
+              <a href="http://abhinav.spsdarj.org/" target="_blank">
+                <li class="list-group-item">Blog of interesting stuff</li>
+              </a>
+              <a href="https://www.youtube.com/channel/UCDtjjIt_1zCMhwvHSJ7JSTg" target="_blank">
+                <li class="list-group-item">My Youtube Channel</li>
+              </a>
+              <a href="http://bit.ly/SQ6wnI" target="_blank">
+                <li class="list-group-item">Install my teenie tiny Chrome extension.</li>
+              </a>
+              <div class="panel-footer">
+                <a href="#demo" data-toggle="collapse" id="change-text">Check out the video below. Click This!</a>
+                <div id="demo" class="collapse">
+                  <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/ioK9zGL0m4k?rel=0&modestbranding=1" allowfullscreen></iframe>
+                  </div>
+                </div>
+              </div>
+            </ul>
+          </div>
+        </div>
+        <hr />
+        <h1>Phone Numbers</h1>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <a data-toggle="collapse" href="#collapse2">
+              <h4 class="panel-title" id="change-heading-2">
+                Click to expand
+              </h4>
+            </a>
+          </div>
+          <div id="collapse2" class="panel-collapse collapse">
+            <ul class="list-group">
+              <a href="tel:+919535059840">
+                <li class="list-group-item">+91-9535059840 (Call)</li>
+              </a>
+              <a href="tel:+918210584457">
+                <li class="list-group-item">+91-8210584457 (Call)</li>
+              </a>
+              <a href="intent://send/+919582905360#Intent;scheme=smsto;package=com.whatsapp;action=android.intent.action.SENDTO;end">
+                <li class="list-group-item">+91-9582905360 (WhatsApp)</li>
+              </a>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <h5>Abhinav Kumar, 2016</h5>
+    </div>
+    <div class="col-sm-4"></div>
+  </body>
+</html>
