@@ -1,2 +1,2 @@
 # basic-pages
-A landing page with search features for multiple sites. Autosuggest enabled
+Some simple pages/sites I made for productive use at some point or other.
