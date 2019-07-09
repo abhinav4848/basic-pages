@@ -1,0 +1,46 @@
+<html>
+<head>
+<!-- Developed by Abhinav Kumar 2015.
+Code from http://jsfiddle.net/WeD75/8/ -->
+<title>Histology Awesome</title>
+<script src="jquery-2.1.0.min.js"></script>
+<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>-->
+<script>
+var indexNum = 0;
+var picSrc = ['1 white fibrous cartilage.jpg','2 hyaline cartilage.jpg','3 Elastic cartilage.jpg','4 Compact bone TS.jpg','5 skeletal muscle.jpg'];
+var lastImage = $("#zoomImage img");
+
+$(window).keydown(function(e){
+        if (e.keyCode == 37) { //left arrow key 
+          lastImage.hide();
+          indexNum--;
+              if(indexNum == -1) indexNum = 4; //set second number to one less than pic Count
+          $("#zoomImage img").attr('src', picSrc[indexNum]).fadeIn();
+          $("#answer").text("Answer goes here"); //Renames Answer line to default
+        }
+        
+        if (e.keyCode == 39) { //right arrow key
+          lastImage.hide();
+          indexNum++;
+              if(indexNum == 5) indexNum = 0; //set first number to total image count
+          $("#zoomImage img").attr('src', picSrc[indexNum]).fadeIn();
+          $("#answer").text("Answer goes here"); //Renames Answer line to default
+        }
+        
+        if (e.keyCode == 38) { //Up arrow key
+          $("#answer").text(picSrc[indexNum]); //Shows name of File in answer
+        }
+    });
+
+</script>
+</head>
+<body>
+<center>
+  <h1>Histology</h1>
+  <em>Use Right or left arrow keys. (Up for answer)</em>
+  <h3 id="answer">Answer goes here</h3>
+  <div id="zoomImage"><img src="1 white fibrous cartilage.jpg"></div>
+  <h5>Work of Abhinav Kumar. 2015</h5>
+</center>
+</body>
+</html>
