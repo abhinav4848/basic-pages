@@ -1,0 +1,76 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #000000;
+    background-image: linear-gradient(315deg, #000000 0%, #414141 74%);
+}
+
+.link {
+    padding: 10px;
+    font-size: 30px;
+    width: 50px;
+    text-align: center;
+    text-decoration: none;
+    margin: 5px 2px;
+    border: 2px solid #000000;
+    border-radius: 5px;
+}
+
+.link:hover {
+    opacity: 0.7;
+    text-decoration: none;
+    color: white;
+}
+
+.link-facebook {
+    background: blue;
+    color: white;
+}
+
+.link-reddit {
+    background: #ff5700;
+    color: white;
+}
+
+.link-quora {
+    background: red;
+    color: white;
+}
+
+.link-torrentz2eu {
+    background: #2457e4;
+    color: white;
+}
+
+.link-github {
+    background: #000000;
+    color: white;
+}
+
+.link-abhinavkr {
+    background: #001c69;
+    color: white;
+}
+
+.link-pornhub {
+    background: gold;
+    color: white;
+}
+
+.link-xvideos {
+    background: #b91313;
+    color: white;
+}
+
+.link-hqporner {
+    background: pink;
+    color: white;
+}
+
+.link-theporndude {
+    background: #09236b;
+    color: white;
+}

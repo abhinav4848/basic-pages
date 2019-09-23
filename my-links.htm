@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./my-links.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.css">
+    <title>Quick Links</title>
+</head>
+
+<body>
+    <h1 class="tc" style="color: white;">Social</h1>
+    <div class="tc">
+        <a href="https://facebook.com" class="link link-facebook">Facebook</a>
+        <a href="https://reddit.com" class="link link-reddit">Reddit</a>
+        <a href="https://quora.com" class="link link-quora">Quora</a>
+    </div>
+
+    <h1 class="tc" style="color: white;">Piracy</h1>
+    <div class="tc">
+        <a href="https://torrentz2.eu.com" class="link link-torrentz2eu">torrentz2.eu</a>
+    </div>
+
+    <h1 class="tc" style="color: white;">Personal</h1>
+    <div class="tc">
+        <a href="https://github.com/abhinav4848" class="link link-github">Git Hub</a>
+        <a href="https://abhinavkr.ga" class="link link-abhinavkr">abhinavkr.ga</a>
+    </div>
+
+    <h1 class="tc" style="color: white;">XXX</h1>
+    <div class="tc">
+        <a href="https://pornhub.com" class="link link-pornhub">Pornhub</a>
+        <a href="https://xvideos.com" class="link link-xvideos">X-Videos</a>
+        <a href="https://hqporner.com" class="link link-hqporner">HQporner</a>
+        <a href="https://theporndude.com" class="link link-theporndude">The Porn Dude</a>
+    </div>
+
+    <script>
+        Array.from(document.getElementsByClassName('link')).forEach(element => {
+            element.setAttribute('target', '_blank');
+        });
+    </script>
+</body>
+
+</html>
