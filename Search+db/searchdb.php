@@ -41,8 +41,8 @@ if (array_key_exists('searchTerm', $_POST)) {
         if (mysqli_num_rows($result) > 0) {
             echo '<ul>';
             while ($row = mysqli_fetch_array($result)) {
-                $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'";
-                echo '<li><a href="#" onclick="'.$onclickattribute.'">'.$row['searchTerm'].'</a> <small><code>('.$row['engine'].')</code> (Date: '.$row['datetime'].')</small></li>';
+                $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'; $('#searchField').keyup()";
+                echo '<li><label class="historyList" onclick="'.$onclickattribute.'"><span class="text-primary">'.$row['searchTerm'].'</span> <small><code>('.$row['engine'].')</code> (Date: '. date("d-M-Y h:i:s a", strtotime($row['datetime'])).')</small></label></li>';
             }
             echo '</ul>';
         }
@@ -60,18 +60,30 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
     if ($result_CheckUnique == false) {
         echo 'That engine already exists';
     } else {
-        $query_insertEngine = "INSERT INTO `engines` (`site name`, `identifier`, `url-prefix`, `url-suffix`)
+        $query_insertEngine = "INSERT INTO `engines` (`site name`, `identifier`, `url-prefix`, `url-suffix`, `nsfw`)
         VALUES (
         '".mysqli_real_escape_string($link, $_POST['sitename'])."',
         '".mysqli_real_escape_string($link, $_POST['identifier'])."',
         '".mysqli_real_escape_string($link, $_POST['urlprefix'])."',
-        '".mysqli_real_escape_string($link, $_POST['urlsuffix'])."');";
+        '".mysqli_real_escape_string($link, $_POST['urlsuffix'])."',
+        '".mysqli_real_escape_string($link, $_POST['nsfw'])."');";
 
         if (mysqli_query($link, $query_insertEngine)) {
             echo 'engine inserted';
         } else {
             echo 'failed to enter into database. Query was: <b>'.$query_insertEngine.'</b>';
         }
+    }
+    die();
+}
+
+// delete a history entry
+if (array_key_exists('delete_history', $_POST) and array_key_exists('id', $_POST) and $_POST['id']!='') {
+    $query_delete_history = "DELETE FROM `searches` WHERE `searches`.`id` = ".mysqli_real_escape_string($link, $_POST['id'])." LIMIT 1";
+    if (mysqli_query($link, $query_delete_history)) {
+        echo 'history deleted';
+    } else {
+        echo 'failed to delete. Query was: <b>'.$query_delete_history.'</b>';
     }
     die();
 }
@@ -90,6 +102,8 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css" rel="stylesheet" />
 
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/9c2d6b042e.js"></script>
 
     <style type="text/css">
     #results {
@@ -98,7 +112,25 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
 
     .select2-container .select2-selection--single {
         height: 34px !important;
-        margin-bottom: 8px;
+        margin-bottom: 0px;
+    }
+
+    .historyList {
+        cursor: pointer;
+    }
+
+    .historyList:hover {
+        background-color: pink;
+    }
+
+    .delete_history {
+        transition: font-size 0.2s;
+        margin-left: 10px;
+    }
+
+    .delete_history:hover {
+        font-size: 1.2em;
+        color: red;
     }
     </style>
 
@@ -146,37 +178,49 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
             <div id="errorInNewEngineMaker"></div>
 
             <form class="form-inline" id="newEngineMake">
-                <div class="form-group mx-sm-3 mb-2">
+                <div class="form-group mr-sm-3 mb-2">
                     <input type="text" name="sitename" id="sitename" class="form-control" placeholder="Site Name">
                 </div>
 
-                <div class="form-group mx-sm-3 mb-2">
+                <div class="form-group mr-sm-3 mb-2">
                     <input type="text" name="identifier" id="identifier" class="form-control"
                         placeholder="Unique Identifier">
                 </div>
 
-                <div class="form-group mx-sm-3 mb-2">
+                <div class="form-group mr-sm-3 mb-2">
                     <input type="text" name="urlprefix" id="urlprefix" class="form-control" placeholder="URL Prefix">
                 </div>
 
-                <div class="form-group mx-sm-3 mb-2">
+                <div class="form-group mr-sm-3 mb-2">
                     <input type="text" name="urlsuffix" id="urlsuffix" class="form-control" placeholder="URL Suffix">
+                </div>
+
+                <div class="form-group mr-sm-3 mb-2">
+                    <select name="nsfw" id="nsfw" class="form-control">
+                        <option value="0" hidden>NSFW?</option>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
                 </div>
 
                 <button type="submit" class="btn btn-primary mb-2">Submit</button>
             </form>
 
         </div>
-
+        <pre>
+        to-do:
+        - Add ability to hide nsfw results
+        - Add ability to edit engines
+        - Change the engine as well when clicking on link</pre>
         <h3>History</h3>
         <ol>
             <?php
                 $query = "SELECT * FROM `searches` ORDER BY `id` DESC LIMIT 100";
                 $result = mysqli_query($link, $query);
                 while ($row = mysqli_fetch_array($result)) {
-                    $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'";
+                    $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'; document.getElementById('searchField').focus(); $('#searchField').keyup()";
                     
-                    echo '<li><label onclick="'.$onclickattribute.'"><a href="#">'.$row['searchTerm'].'</a><small> <code>('.$row['engine'].')</code> (Date: '.$row['datetime'].')</small></label></li>';
+                    echo '<li><label class="historyList" onclick="'.$onclickattribute.'"><span class="text-primary">'.$row['searchTerm'].'</span><small> <code>('.$row['engine'].')</code> (Date: '. date("d-M-Y h:i:s a", strtotime($row['datetime'])).')</small></label> <a href="#" class="delete_history" data-id="'.$row['id'].'"><i class="far fa-trash-alt"></i></a></li>';
                 }
             ?>
         </ol>
@@ -198,6 +242,13 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
     //Searches with instant database results
     $("#searchField").keyup(function() {
         var searchTerm = $("#searchField").val();
+        if (document.title != searchTerm && searchTerm != '') {
+            var engine = $("#engine").val();
+            document.title = 'SearchStuff: (' + engine + ')  ' + searchTerm;
+        } else {
+            document.title = 'SearchStuff!';
+        }
+
         $.ajax({
             type: "POST",
             url: "searchdb.php",
@@ -206,7 +257,7 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
             },
             success: function(result) {
                 if (result != '') {
-                    console.log(result);
+
                     $("#results").show();
                     $("#results").html("<b>Results</b>:<br/>" + result);
                 } else {
@@ -216,13 +267,15 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
         })
     })
 
+    // make new search engine
     $("#newEngineMake").submit(function(e) {
-        e.preventDefault(); // avoid to execute the actual submit of the form.
+        e.preventDefault();
 
         var sitename = $("#sitename").val();
         var identifier = $("#identifier").val();
         var urlprefix = $("#urlprefix").val();
         var urlsuffix = $("#urlsuffix").val();
+        var nsfw = $("#nsfw").val();
 
         if (sitename != '' && identifier != '' && urlprefix != '') {
             $.ajax({
@@ -232,7 +285,8 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
                     sitename: sitename,
                     identifier: identifier,
                     urlprefix: urlprefix,
-                    urlsuffix: urlsuffix
+                    urlsuffix: urlsuffix,
+                    nsfw: nsfw
                 },
                 success: function(data) {
                     alert(data);
@@ -245,8 +299,9 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
 
     });
 
+    // save search to db
     $("#searchForm").submit(function(e) {
-        e.preventDefault(); // avoid to execute the actual submit of the form.
+        e.preventDefault();
 
         var searchTerm = $("#searchField").val();
         var engine = $("#engine").val();
@@ -269,6 +324,25 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
             $("#searchTerm").focus();
         }
 
+    });
+
+    // delete history
+    $(".delete_history").click(function(e) {
+        e.preventDefault();
+
+        if (confirm("Sure you want to delete this entry?")) {
+            $.ajax({
+                type: "POST",
+                url: "searchdb.php",
+                data: {
+                    delete_history: 'yes',
+                    id: this.dataset.id
+                },
+                success: function(data) {
+                    alert(data);
+                }
+            });
+        }
     });
     </script>
     <?php
