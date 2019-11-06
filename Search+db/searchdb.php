@@ -87,6 +87,39 @@ if (array_key_exists('delete_history', $_POST) and array_key_exists('id', $_POST
     }
     die();
 }
+
+// change Engine
+if (array_key_exists('changeEngine', $_POST)) {
+    if ($_POST['changeEngine'] == 'changeEngine') {
+        // find all details about the engine as requested
+        $query = "SELECT * FROM `engines` WHERE identifier='".mysqli_real_escape_string($link, $_POST['engine'])."' LIMIT 1";
+    
+        $result = mysqli_query($link, $query);
+        if (mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+            echo json_encode($row);
+        } else {
+            echo 'failed to find. Query was: <b>'.$query.'</b>';
+        }
+    }
+    if ($_POST['changeEngine'] == 'update') {
+        // update engine info
+        $query = "UPDATE `engines` 
+        SET `site name` = '".mysqli_real_escape_string($link, $_POST['sitename'])."',
+        `url-prefix` = '".mysqli_real_escape_string($link, $_POST['urlprefix'])."',
+        `url-suffix` = '".mysqli_real_escape_string($link, $_POST['urlsuffix'])."',
+        `nsfw` = ".mysqli_real_escape_string($link, $_POST['nsfw'])."
+        WHERE id = ".mysqli_real_escape_string($link, $_POST['id'])." LIMIT 1";
+
+        if (mysqli_query($link, $query)) {
+            echo 'success';
+        } else {
+            echo 'failed to update. Query was: <b>'.$query.'</b>';
+        }
+    }
+    die();
+}
+
 ?>
 
 <!doctype html>
@@ -165,7 +198,7 @@ if (array_key_exists('delete_history', $_POST) and array_key_exists('id', $_POST
             </div>
 
             <button type="submit" class="btn btn-primary mx-2">Submit</button>
-
+            <span class="btn btn-primary mx-2" id="edit-engine"><i class="fas fa-edit"></i> Edit Engine</span>
         </form>
 
 
@@ -209,13 +242,29 @@ if (array_key_exists('delete_history', $_POST) and array_key_exists('id', $_POST
         </div>
         <pre>
         to-do:
-        - Add ability to hide nsfw results
-        - Add ability to edit engines
-        - Change the engine as well when clicking on link</pre>
+        - Change the engine as well when clicking on link
+        </pre>
         <h3>History</h3>
+        <p class="small">
+            <a href="?filter=sfw-only">SFW</a> |
+            <a href="?filter=nsfw-only">NSFW</a> |
+            <a href="?filter=all">All</a>
+        </p>
         <ol>
             <?php
-                $query = "SELECT * FROM `searches` ORDER BY `id` DESC LIMIT 100";
+                if (array_key_exists('filter', $_GET)) {
+                    if ($_GET['filter'] == 'sfw-only') {
+                        $query = "SELECT * FROM `searches` INNER JOIN `engines` ON searches.engine = engines.identifier AND engines.nsfw='0' ORDER BY searches.id DESC LIMIT 100";
+                    }
+                    if ($_GET['filter'] == 'nsfw-only') {
+                        $query = "SELECT * FROM `searches` INNER JOIN `engines` ON searches.engine = engines.identifier AND engines.nsfw='1' ORDER BY searches.id DESC LIMIT 100";
+                    }
+                    if ($_GET['filter'] == 'all') {
+                        $query = "SELECT * FROM `searches` ORDER BY searches.id DESC LIMIT 100";
+                    }
+                } else {
+                    $query = "SELECT * FROM `searches` INNER JOIN `engines` ON searches.engine = engines.identifier AND engines.nsfw='0' ORDER BY searches.id DESC LIMIT 100";
+                }
                 $result = mysqli_query($link, $query);
                 while ($row = mysqli_fetch_array($result)) {
                     $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'; document.getElementById('searchField').focus(); $('#searchField').keyup()";
@@ -296,7 +345,6 @@ if (array_key_exists('delete_history', $_POST) and array_key_exists('id', $_POST
             alert('Please fill at least first 3 boxes');
             $("#sitename").focus();
         }
-
     });
 
     // save search to db
@@ -344,8 +392,113 @@ if (array_key_exists('delete_history', $_POST) and array_key_exists('id', $_POST
             });
         }
     });
+
+    // edit engine
+    $("#edit-engine").click(function(e) {
+        //e.preventDefault();
+
+        var engine = $("#engine").val();
+
+        $.ajax({
+            type: "POST",
+            url: "searchdb.php",
+            data: {
+                changeEngine: 'changeEngine',
+                engine: engine
+            },
+            success: function(data) {
+                var modal = $('#changeSearchEngineDetails')
+                modal.modal('show')
+
+                data = JSON.parse(data)
+
+                modal.find('#modal-id').val(data.id)
+                modal.find('#modal-identifier').val(data.identifier)
+                modal.find('.modal-body #sitename').val(data["site name"])
+                modal.find('.modal-body #url-prefix').val(data["url-prefix"])
+                modal.find('.modal-body #url-suffix').val(data["url-suffix"])
+                modal.find('.modal-body #nsfw').val(data.nsfw)
+                modal.find('#updateEngineButton').val('Update ' + data.identifier)
+            }
+        });
+    })
+
+    // actually update the engine
+    $(document).on('click', '#updateEngineButton', function(e) {
+        e.preventDefault();
+
+        var modal = $('#changeSearchEngineDetails')
+
+        $.ajax({
+            type: "POST",
+            url: "searchdb.php",
+            data: {
+                changeEngine: 'update',
+                id: modal.find('#modal-id').val(),
+                sitename: modal.find('.modal-body #sitename').val(),
+                urlprefix: modal.find('.modal-body #url-prefix').val(),
+                urlsuffix: modal.find('.modal-body #url-suffix').val(),
+                nsfw: modal.find('.modal-body #nsfw').val()
+            },
+            success: function(data) {
+                console.log(data)
+                if (data == 'success') {
+                    modal.modal('hide')
+                } else {
+                    alert(data)
+                }
+            }
+        });
+    })
     </script>
+
+    <div class="modal fade" id="changeSearchEngineDetails" tabindex="-1" role="dialog"
+        aria-labelledby="changeSearchEngine_Label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeSearchEngine_Label">Edit Engine</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="modal-id" class="col-form-label">ID</label>
+                            <input type="text" class="form-control" id="modal-id" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="modal-identifier" class="col-form-label">Identifier</label>
+                            <input type="text" class="form-control" id="modal-identifier" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="sitename" class="col-form-label">Site Name:</label>
+                            <input type="text" class="form-control" id="sitename">
+                        </div>
+                        <div class="form-group">
+                            <label for="url-prefix" class="col-form-label">URL Prefix:</label>
+                            <input type="text" class="form-control" id="url-prefix">
+                        </div>
+                        <div class="form-group">
+                            <label for="url-suffix" class="col-form-label">URL Suffix:</label>
+                            <input type="text" class="form-control" id="url-suffix">
+                        </div>
+                        <div class="form-group">
+                            <label for="nsfw" class="col-form-label">NSFW</label>
+                            <input type="text" class="form-control" id="nsfw">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="updateEngineButton">Update Engine</button>
+                </div>
+            </div>
+        </div>
+    </div> <!-- End modal -->
     <?php
+        // generate javascript for every search engine
         echo '<script>';
         echo 'function openup(engine, search) {
             ';
