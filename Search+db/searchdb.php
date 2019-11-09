@@ -1,23 +1,11 @@
 <?php
-date_default_timezone_set("Asia/Kolkata");
-$link = mysqli_connect("localhost", "root", "", "searchdb");
-// Check connection
-if (mysqli_connect_errno()) {
-    die("Failed to connect to MySQL: " . mysqli_connect_error());
-}
-
-if (!empty($_POST)) {
-    foreach ($_POST as $key => $value) {
-        $_POST[$key] = is_array($key) ? $_POST[$key]: strip_tags($_POST[$key], '');
-    }
-}
-
+include('connect-db.php');
 
 /** AJAX SCRIPTS */
 
 // Insert term into database
 if (array_key_exists('searchTerm', $_POST) and $_POST['searchTerm']!='' and array_key_exists('submit', $_POST)) {
-    $query = "INSERT INTO `searches` (`searchTerm`, `engine`, `datetime`, `searcher`)
+    $query = "INSERT INTO `searcher_searches` (`searchTerm`, `engine`, `datetime`, `searcher`)
         VALUES (
         '".mysqli_real_escape_string($link, $_POST['searchTerm'])."',
         '".mysqli_real_escape_string($link, $_POST['engine'])."',
@@ -35,7 +23,7 @@ if (array_key_exists('searchTerm', $_POST) and $_POST['searchTerm']!='' and arra
 // Search term in database
 if (array_key_exists('searchTerm', $_POST)) {
     if ($_POST['searchTerm']!='') {
-        $query = "SELECT * FROM `searches` WHERE `searchTerm` LIKE '%".mysqli_real_escape_string($link, $_POST['searchTerm'])."%' LIMIT 10";
+        $query = "SELECT * FROM `searcher_searches` WHERE `searchTerm` LIKE '%".mysqli_real_escape_string($link, $_POST['searchTerm'])."%' LIMIT 10";
 
         $result = mysqli_query($link, $query);
         if (mysqli_num_rows($result) > 0) {
@@ -54,13 +42,13 @@ if (array_key_exists('searchTerm', $_POST)) {
 if (array_key_exists('sitename', $_POST) and $_POST['sitename']!='' and
 array_key_exists('identifier', $_POST) and $_POST['identifier']!='' and
 array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
-    $query_CheckUnique = "SELECT * FROM `engines` WHERE identifier='".mysqli_real_escape_string($link, $_POST['identifier'])."' LIMIT 1";
+    $query_CheckUnique = "SELECT * FROM `searcher_engines` WHERE identifier='".mysqli_real_escape_string($link, $_POST['identifier'])."' LIMIT 1";
     $result_CheckUnique = mysqli_query($link, $query_CheckUnique);
 
     if ($result_CheckUnique == false) {
         echo 'That engine already exists';
     } else {
-        $query_insertEngine = "INSERT INTO `engines` (`site name`, `identifier`, `url-prefix`, `url-suffix`, `nsfw`)
+        $query_insertEngine = "INSERT INTO `searcher_engines` (`site name`, `identifier`, `url-prefix`, `url-suffix`, `nsfw`)
         VALUES (
         '".mysqli_real_escape_string($link, $_POST['sitename'])."',
         '".mysqli_real_escape_string($link, $_POST['identifier'])."',
@@ -79,7 +67,7 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
 
 // delete a history entry
 if (array_key_exists('delete_history', $_POST) and array_key_exists('id', $_POST) and $_POST['id']!='') {
-    $query_delete_history = "DELETE FROM `searches` WHERE `searches`.`id` = ".mysqli_real_escape_string($link, $_POST['id'])." LIMIT 1";
+    $query_delete_history = "DELETE FROM `searcher_searches` WHERE `searcher_searches`.`id` = ".mysqli_real_escape_string($link, $_POST['id'])." LIMIT 1";
     if (mysqli_query($link, $query_delete_history)) {
         echo 'history deleted';
     } else {
@@ -92,7 +80,7 @@ if (array_key_exists('delete_history', $_POST) and array_key_exists('id', $_POST
 if (array_key_exists('changeEngine', $_POST)) {
     if ($_POST['changeEngine'] == 'changeEngine') {
         // find all details about the engine as requested
-        $query = "SELECT * FROM `engines` WHERE identifier='".mysqli_real_escape_string($link, $_POST['engine'])."' LIMIT 1";
+        $query = "SELECT * FROM `searcher_engines` WHERE identifier='".mysqli_real_escape_string($link, $_POST['engine'])."' LIMIT 1";
     
         $result = mysqli_query($link, $query);
         if (mysqli_num_rows($result) > 0) {
@@ -104,7 +92,7 @@ if (array_key_exists('changeEngine', $_POST)) {
     }
     if ($_POST['changeEngine'] == 'update') {
         // update engine info
-        $query = "UPDATE `engines` 
+        $query = "UPDATE `searcher_engines` 
         SET `site name` = '".mysqli_real_escape_string($link, $_POST['sitename'])."',
         `url-prefix` = '".mysqli_real_escape_string($link, $_POST['urlprefix'])."',
         `url-suffix` = '".mysqli_real_escape_string($link, $_POST['urlsuffix'])."',
@@ -178,7 +166,7 @@ if (array_key_exists('changeEngine', $_POST)) {
 
             <select name="engine" class="form-control" id="engine">
                 <?php
-                    $query_engines = "SELECT * FROM `engines`";
+                    $query_engines = "SELECT * FROM `searcher_engines`";
                     $result_engines = mysqli_query($link, $query_engines);
                     while ($row_engines = mysqli_fetch_array($result_engines)) {
                         $identifier=$row_engines['identifier'];
@@ -254,16 +242,16 @@ if (array_key_exists('changeEngine', $_POST)) {
             <?php
                 if (array_key_exists('filter', $_GET)) {
                     if ($_GET['filter'] == 'sfw-only') {
-                        $query = "SELECT * FROM `searches` INNER JOIN `engines` ON searches.engine = engines.identifier AND engines.nsfw='0' ORDER BY searches.id DESC LIMIT 100";
+                        $query = "SELECT * FROM `searcher_searches` INNER JOIN `searcher_engines` ON searcher_searches.engine = searcher_engines.identifier AND searcher_engines.nsfw='0' ORDER BY searcher_searches.id DESC LIMIT 100";
                     }
                     if ($_GET['filter'] == 'nsfw-only') {
-                        $query = "SELECT * FROM `searches` INNER JOIN `engines` ON searches.engine = engines.identifier AND engines.nsfw='1' ORDER BY searches.id DESC LIMIT 100";
+                        $query = "SELECT * FROM `searcher_searches` INNER JOIN `searcher_engines` ON searcher_searches.engine = searcher_engines.identifier AND searcher_engines.nsfw='1' ORDER BY searcher_searches.id DESC LIMIT 100";
                     }
                     if ($_GET['filter'] == 'all') {
-                        $query = "SELECT * FROM `searches` ORDER BY searches.id DESC LIMIT 100";
+                        $query = "SELECT * FROM `searcher_searches` ORDER BY searcher_searches.id DESC LIMIT 100";
                     }
                 } else {
-                    $query = "SELECT * FROM `searches` INNER JOIN `engines` ON searches.engine = engines.identifier AND engines.nsfw='0' ORDER BY searches.id DESC LIMIT 100";
+                    $query = "SELECT * FROM `searcher_searches` INNER JOIN `searcher_engines` ON searcher_searches.engine = searcher_engines.identifier AND searcher_engines.nsfw='0' ORDER BY searcher_searches.id DESC LIMIT 100";
                 }
                 $result = mysqli_query($link, $query);
                 while ($row = mysqli_fetch_array($result)) {
@@ -283,19 +271,32 @@ if (array_key_exists('changeEngine', $_POST)) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
 
     <script type="text/javascript">
-    //making script select2
-    $(document).ready(function() {
+    window.onload = function() {
+        //making script select2
         $('#engine').select2();
-    });
+
+        var url_string = window.location.href
+        //The URL() constructor returns a newly created URL object representing the URL defined by the parameters.
+        var url = new URL(url_string);
+        var c = url.searchParams.get("search");
+        document.getElementById('searchField').value = c;
+        searchField();
+    };
 
     //Searches with instant database results
-    $("#searchField").keyup(function() {
+    $("#searchField").keyup(searchField);
+
+    function searchField() {
         var searchTerm = $("#searchField").val();
         if (document.title != searchTerm && searchTerm != '') {
             var engine = $("#engine").val();
+
             document.title = 'SearchStuff: (' + engine + ')  ' + searchTerm;
+            window.history.replaceState('', '', '/?search=' + searchTerm);
+
         } else {
             document.title = 'SearchStuff!';
+            window.history.pushState('', '', '/');
         }
 
         $.ajax({
@@ -314,7 +315,7 @@ if (array_key_exists('changeEngine', $_POST)) {
                 }
             }
         })
-    })
+    }
 
     // make new search engine
     $("#newEngineMake").submit(function(e) {
