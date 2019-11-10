@@ -48,12 +48,13 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
     if ($result_CheckUnique == false) {
         echo 'That engine already exists';
     } else {
-        $query_insertEngine = "INSERT INTO `searcher_engines` (`site name`, `identifier`, `url-prefix`, `url-suffix`, `nsfw`)
+        $query_insertEngine = "INSERT INTO `searcher_engines` (`site name`, `identifier`, `url-prefix`, `url-suffix`, `baseurl`, `nsfw`)
         VALUES (
         '".mysqli_real_escape_string($link, $_POST['sitename'])."',
         '".mysqli_real_escape_string($link, $_POST['identifier'])."',
         '".mysqli_real_escape_string($link, $_POST['urlprefix'])."',
         '".mysqli_real_escape_string($link, $_POST['urlsuffix'])."',
+        '".mysqli_real_escape_string($link, $_POST['baseurl'])."',
         '".mysqli_real_escape_string($link, $_POST['nsfw'])."');";
 
         if (mysqli_query($link, $query_insertEngine)) {
@@ -69,7 +70,7 @@ array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
 if (array_key_exists('delete_history', $_POST) and array_key_exists('id', $_POST) and $_POST['id']!='') {
     $query_delete_history = "DELETE FROM `searcher_searches` WHERE `searcher_searches`.`id` = ".mysqli_real_escape_string($link, $_POST['id'])." LIMIT 1";
     if (mysqli_query($link, $query_delete_history)) {
-        echo 'history deleted';
+        echo 'history deleted.';
     } else {
         echo 'failed to delete. Query was: <b>'.$query_delete_history.'</b>';
     }
@@ -96,6 +97,7 @@ if (array_key_exists('changeEngine', $_POST)) {
         SET `site name` = '".mysqli_real_escape_string($link, $_POST['sitename'])."',
         `url-prefix` = '".mysqli_real_escape_string($link, $_POST['urlprefix'])."',
         `url-suffix` = '".mysqli_real_escape_string($link, $_POST['urlsuffix'])."',
+        `baseurl` = '".mysqli_real_escape_string($link, $_POST['baseurl'])."',
         `nsfw` = ".mysqli_real_escape_string($link, $_POST['nsfw'])."
         WHERE id = ".mysqli_real_escape_string($link, $_POST['id'])." LIMIT 1";
 
@@ -171,7 +173,8 @@ if (array_key_exists('changeEngine', $_POST)) {
                     while ($row_engines = mysqli_fetch_array($result_engines)) {
                         $identifier=$row_engines['identifier'];
                         $sitename = $row_engines['site name'];
-                        echo "<option value='".$identifier."'>".$sitename." (".$identifier.")</option>";
+                        $baseurl = $row_engines['baseurl'];
+                        echo "<option value='".$identifier."' data-url='".$baseurl."'>".$sitename." (".$identifier.")</option>";
                     }
                 ?>
             </select>
@@ -187,6 +190,9 @@ if (array_key_exists('changeEngine', $_POST)) {
 
             <button type="submit" class="btn btn-primary mx-2">Submit</button>
             <span class="btn btn-primary mx-2" id="edit-engine"><i class="fas fa-edit"></i> Edit Engine</span>
+            <span class="btn btn-primary mx-2" id="openurl"
+                onclick="window.open(document.getElementById('engine').options[document.getElementById('engine').selectedIndex].getAttribute('data-url'))"><i
+                    class="fas fa-globe"></i></span>
         </form>
 
 
@@ -217,6 +223,10 @@ if (array_key_exists('changeEngine', $_POST)) {
                 </div>
 
                 <div class="form-group mr-sm-3 mb-2">
+                    <input type="text" name="baseurl" id="baseurl" class="form-control" placeholder="Base URL">
+                </div>
+
+                <div class="form-group mr-sm-3 mb-2">
                     <select name="nsfw" id="nsfw" class="form-control">
                         <option value="0" hidden>NSFW?</option>
                         <option value="0">No</option>
@@ -231,6 +241,8 @@ if (array_key_exists('changeEngine', $_POST)) {
         <pre>
         to-do:
         - Change the engine as well when clicking on link
+        - Export and import engines
+        - Store a search url in pure form into the history, without searching for it in an engine
         </pre>
         <h3>History</h3>
         <p class="small">
@@ -240,24 +252,40 @@ if (array_key_exists('changeEngine', $_POST)) {
         </p>
         <ol>
             <?php
+                $query = "SELECT *, searcher_searches.id AS searchID FROM `searcher_searches` INNER JOIN `searcher_engines` ON searcher_searches.engine = searcher_engines.identifier";
+                
                 if (array_key_exists('filter', $_GET)) {
                     if ($_GET['filter'] == 'sfw-only') {
-                        $query = "SELECT * FROM `searcher_searches` INNER JOIN `searcher_engines` ON searcher_searches.engine = searcher_engines.identifier AND searcher_engines.nsfw='0' ORDER BY searcher_searches.id DESC LIMIT 100";
+                        $query.= " AND searcher_engines.nsfw='0'";
                     }
                     if ($_GET['filter'] == 'nsfw-only') {
-                        $query = "SELECT * FROM `searcher_searches` INNER JOIN `searcher_engines` ON searcher_searches.engine = searcher_engines.identifier AND searcher_engines.nsfw='1' ORDER BY searcher_searches.id DESC LIMIT 100";
+                        $query.= " AND searcher_engines.nsfw='1'";
                     }
                     if ($_GET['filter'] == 'all') {
-                        $query = "SELECT * FROM `searcher_searches` ORDER BY searcher_searches.id DESC LIMIT 100";
+                        $query.= "";
                     }
                 } else {
-                    $query = "SELECT * FROM `searcher_searches` INNER JOIN `searcher_engines` ON searcher_searches.engine = searcher_engines.identifier AND searcher_engines.nsfw='0' ORDER BY searcher_searches.id DESC LIMIT 100";
+                    $query.= " AND searcher_engines.nsfw='0'";
                 }
+                
+                $query.=" ORDER BY searcher_searches.id DESC LIMIT 100";
                 $result = mysqli_query($link, $query);
-                while ($row = mysqli_fetch_array($result)) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    // echo '<pre>';
+                    // echo $query.'<br />';
+                    // print_r($row);
+                    // echo '</pre>';
                     $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'; document.getElementById('searchField').focus(); $('#searchField').keyup()";
                     
-                    echo '<li><label class="historyList" onclick="'.$onclickattribute.'"><span class="text-primary">'.$row['searchTerm'].'</span><small> <code>('.$row['engine'].')</code> (Date: '. date("d-M-Y h:i:s a", strtotime($row['datetime'])).')</small></label> <a href="#" class="delete_history" data-id="'.$row['id'].'"><i class="far fa-trash-alt"></i></a></li>';
+                    echo '<li>
+                    <label class="historyList" onclick="'.$onclickattribute.'">
+                    <span class="text-primary">'.$row['searchTerm'].'</span>
+                    <small> <code>('.$row['engine'].')</code> (Date: '. date("d-M-Y h:i:s a", strtotime($row['datetime'])).')</small>
+                    </label> 
+                    <a href="#" class="delete_history" data-id="'.$row['searchID'].'">
+                    <i class="far fa-trash-alt"></i>
+                    </a>
+                    </li>';
                 }
             ?>
         </ol>
@@ -283,20 +311,23 @@ if (array_key_exists('changeEngine', $_POST)) {
         searchField();
     };
 
+
+
     //Searches with instant database results
     $("#searchField").keyup(searchField);
 
     function searchField() {
         var searchTerm = $("#searchField").val();
+
         if (document.title != searchTerm && searchTerm != '') {
             var engine = $("#engine").val();
 
             document.title = 'SearchStuff: (' + engine + ')  ' + searchTerm;
-            window.history.replaceState('', '', '/?search=' + searchTerm);
+            window.history.replaceState('', '', window.location.pathname + '?search=' + searchTerm);
 
         } else {
             document.title = 'SearchStuff!';
-            window.history.pushState('', '', '/');
+            window.history.pushState('', '', window.location.pathname);
         }
 
         $.ajax({
@@ -418,6 +449,7 @@ if (array_key_exists('changeEngine', $_POST)) {
                 modal.find('.modal-body #sitename').val(data["site name"])
                 modal.find('.modal-body #url-prefix').val(data["url-prefix"])
                 modal.find('.modal-body #url-suffix').val(data["url-suffix"])
+                modal.find('.modal-body #baseurl').val(data["baseurl"])
                 modal.find('.modal-body #nsfw').val(data.nsfw)
                 modal.find('#updateEngineButton').val('Update ' + data.identifier)
             }
@@ -439,6 +471,7 @@ if (array_key_exists('changeEngine', $_POST)) {
                 sitename: modal.find('.modal-body #sitename').val(),
                 urlprefix: modal.find('.modal-body #url-prefix').val(),
                 urlsuffix: modal.find('.modal-body #url-suffix').val(),
+                baseurl: modal.find('.modal-body #baseurl').val(),
                 nsfw: modal.find('.modal-body #nsfw').val()
             },
             success: function(data) {
@@ -484,6 +517,10 @@ if (array_key_exists('changeEngine', $_POST)) {
                         <div class="form-group">
                             <label for="url-suffix" class="col-form-label">URL Suffix:</label>
                             <input type="text" class="form-control" id="url-suffix">
+                        </div>
+                        <div class="form-group">
+                            <label for="baseurl" class="col-form-label">Base URL:</label>
+                            <input type="text" class="form-control" id="baseurl">
                         </div>
                         <div class="form-group">
                             <label for="nsfw" class="col-form-label">NSFW</label>
