@@ -155,6 +155,11 @@ if (array_key_exists('changeEngine', $_POST)) {
         font-size: 1.2em;
         color: red;
     }
+
+    #error,
+    #success {
+        display: none;
+    }
     </style>
 
     <title>Search Stuff</title>
@@ -200,9 +205,11 @@ if (array_key_exists('changeEngine', $_POST)) {
             <!-- Search results are displayed by ajax here-->
         </div>
 
+        <div class="alert alert-danger fade show mt-2" id="error"> </div>
+        <div class="alert alert-success fade show mt-2" id="success"> </div>
+
         <div id="newengine">
             <h3>New Engine Maker</h3>
-            <div id="errorInNewEngineMaker"></div>
 
             <form class="form-inline" id="newEngineMake">
                 <div class="form-group mr-sm-3 mb-2">
@@ -242,6 +249,7 @@ if (array_key_exists('changeEngine', $_POST)) {
         to-do:
         - Change the engine as well when clicking on link
         - Export and import engines
+        - Delete engine
         - Store a search url in pure form into the history, without searching for it in an engine
         </pre>
         <h3>History</h3>
@@ -311,8 +319,6 @@ if (array_key_exists('changeEngine', $_POST)) {
         searchField();
     };
 
-
-
     //Searches with instant database results
     $("#searchField").keyup(searchField);
 
@@ -356,6 +362,7 @@ if (array_key_exists('changeEngine', $_POST)) {
         var identifier = $("#identifier").val();
         var urlprefix = $("#urlprefix").val();
         var urlsuffix = $("#urlsuffix").val();
+        var baseurl = $("#baseurl").val();
         var nsfw = $("#nsfw").val();
 
         if (sitename != '' && identifier != '' && urlprefix != '') {
@@ -367,14 +374,22 @@ if (array_key_exists('changeEngine', $_POST)) {
                     identifier: identifier,
                     urlprefix: urlprefix,
                     urlsuffix: urlsuffix,
+                    baseurl: baseurl,
                     nsfw: nsfw
                 },
                 success: function(data) {
-                    alert(data);
+                    if (data == 'engine inserted') {
+                        document.getElementById('success').style.display = 'block';
+                        $("#success").html(data);
+                    } else {
+                        document.getElementById('error').style.display = 'block';
+                        $("#error").html(data);
+                    }
                 }
             });
         } else {
-            alert('Please fill at least first 3 boxes');
+            document.getElementById('error').style.display = 'block';
+            $("#error").html('Please fill at least first 3 boxes');
             $("#sitename").focus();
         }
     });
@@ -400,7 +415,8 @@ if (array_key_exists('changeEngine', $_POST)) {
                 }
             });
         } else {
-            alert('Please Enter a Term');
+            document.getElementById('error').style.display = 'block';
+            $("#error").html('Please Enter a Term');
             $("#searchTerm").focus();
         }
 
@@ -419,7 +435,8 @@ if (array_key_exists('changeEngine', $_POST)) {
                     id: this.dataset.id
                 },
                 success: function(data) {
-                    alert(data);
+                    document.getElementById('success').style.display = 'block';
+                    $("#success").html(data);
                 }
             });
         }
@@ -479,7 +496,8 @@ if (array_key_exists('changeEngine', $_POST)) {
                 if (data == 'success') {
                     modal.modal('hide')
                 } else {
-                    alert(data)
+                    document.getElementById('success').style.display = 'block';
+                    $("#success").html(data)
                 }
             }
         });
