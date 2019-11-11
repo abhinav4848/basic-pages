@@ -381,9 +381,17 @@ if (array_key_exists('changeEngine', $_POST)) {
                     if (data == 'engine inserted') {
                         document.getElementById('success').style.display = 'block';
                         $("#success").html(data);
+                        window.setTimeout(() => {
+                                document.getElementById('success').style.display = 'none';
+                            },
+                            3000);
                     } else {
                         document.getElementById('error').style.display = 'block';
                         $("#error").html(data);
+                        window.setTimeout(() => {
+                                document.getElementById('error').style.display = 'none';
+                            },
+                            3000);
                     }
                 }
             });
@@ -391,6 +399,10 @@ if (array_key_exists('changeEngine', $_POST)) {
             document.getElementById('error').style.display = 'block';
             $("#error").html('Please fill at least first 3 boxes');
             $("#sitename").focus();
+            window.setTimeout(() => {
+                    document.getElementById('error').style.display = 'none';
+                },
+                3000);
         }
     });
 
@@ -417,6 +429,10 @@ if (array_key_exists('changeEngine', $_POST)) {
         } else {
             document.getElementById('error').style.display = 'block';
             $("#error").html('Please Enter a Term');
+            window.setTimeout(() => {
+                    document.getElementById('error').style.display = 'none';
+                },
+                3000);
             $("#searchTerm").focus();
         }
 
@@ -437,6 +453,10 @@ if (array_key_exists('changeEngine', $_POST)) {
                 success: function(data) {
                     document.getElementById('success').style.display = 'block';
                     $("#success").html(data);
+                    window.setTimeout(() => {
+                            document.getElementById('success').style.display = 'none';
+                        },
+                        3000);
                 }
             });
         }
@@ -496,8 +516,12 @@ if (array_key_exists('changeEngine', $_POST)) {
                 if (data == 'success') {
                     modal.modal('hide')
                 } else {
-                    document.getElementById('success').style.display = 'block';
-                    $("#success").html(data)
+                    document.getElementById('error').style.display = 'block';
+                    $("#error").html(data)
+                    window.setTimeout(() => {
+                            document.getElementById('error').style.display = 'none';
+                        },
+                        3000);
                 }
             }
         });
