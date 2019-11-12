@@ -107,6 +107,29 @@ if (array_key_exists('changeEngine', $_POST)) {
             echo 'failed to update. Query was: <b>'.$query.'</b>';
         }
     }
+    if ($_POST['changeEngine'] == 'delete') {
+        // get the identifier column from selected engine
+        $query = "SELECT `identifier` FROM `searcher_engines` WHERE id='".mysqli_real_escape_string($link, $_POST['id'])."' LIMIT 1";
+        $result = mysqli_query($link, $query);
+        if (mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+
+            // set the engine to hidden, and free up the identifier column, but remember it as old-identifier
+            $query = "UPDATE `searcher_engines` SET
+            `hidden` = 1,
+            `old-identifier` = '".mysqli_real_escape_string($link, $row['identifier'])."',
+            `identifier` = ''
+            WHERE id = ".mysqli_real_escape_string($link, $_POST['id'])." LIMIT 1";
+
+            if (mysqli_query($link, $query)) {
+                echo 'success';
+            } else {
+                echo 'failed to Delete. Query was: <b>'.$query.'</b>';
+            }
+        } else {
+            echo 'failed. Could not extract details of the engine';
+        }
+    }
     die();
 }
 
@@ -173,7 +196,7 @@ if (array_key_exists('changeEngine', $_POST)) {
 
             <select name="engine" class="form-control" id="engine">
                 <?php
-                    $query_engines = "SELECT * FROM `searcher_engines`";
+                    $query_engines = "SELECT * FROM `searcher_engines` WHERE `hidden`=0";
                     $result_engines = mysqli_query($link, $query_engines);
                     while ($row_engines = mysqli_fetch_array($result_engines)) {
                         $identifier=$row_engines['identifier'];
@@ -249,7 +272,6 @@ if (array_key_exists('changeEngine', $_POST)) {
         to-do:
         - Change the engine as well when clicking on link
         - Export and import engines
-        - Delete engine
         - Store a search url in pure form into the history, without searching for it in an engine
         </pre>
         <h3>History</h3>
@@ -489,6 +511,8 @@ if (array_key_exists('changeEngine', $_POST)) {
                 modal.find('.modal-body #baseurl').val(data["baseurl"])
                 modal.find('.modal-body #nsfw').val(data.nsfw)
                 modal.find('#updateEngineButton').val('Update ' + data.identifier)
+                modal.find('.modal-footer #deleteEngine')[0].setAttribute('data-identifier', data[
+                    "identifier"]);
             }
         });
     })
@@ -515,6 +539,41 @@ if (array_key_exists('changeEngine', $_POST)) {
                 console.log(data)
                 if (data == 'success') {
                     modal.modal('hide')
+                } else {
+                    document.getElementById('error').style.display = 'block';
+                    $("#error").html(data)
+                    window.setTimeout(() => {
+                            document.getElementById('error').style.display = 'none';
+                        },
+                        3000);
+                }
+            }
+        });
+    })
+
+    // delete engine. Doesn't actually delete. Just hides the engine and frees up the identifier
+    $(document).on('click', '#deleteEngine', function(e) {
+        e.preventDefault();
+
+        var modal = $('#changeSearchEngineDetails')
+
+        $.ajax({
+            type: "POST",
+            url: "searchdb.php",
+            data: {
+                changeEngine: 'delete',
+                id: modal.find('#modal-id').val()
+            },
+            success: function(data) {
+                console.log(data)
+                if (data == 'success') {
+                    modal.modal('hide')
+                    document.getElementById('success').style.display = 'block';
+                    $("#success").html(data)
+                    window.setTimeout(() => {
+                            document.getElementById('success').style.display = 'none';
+                        },
+                        3000);
                 } else {
                     document.getElementById('error').style.display = 'block';
                     $("#error").html(data)
@@ -571,6 +630,7 @@ if (array_key_exists('changeEngine', $_POST)) {
                     </form>
                 </div>
                 <div class="modal-footer">
+                    <a href="#" class="text-danger" id="deleteEngine">Delete Engine</a>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="updateEngineButton">Update Engine</button>
                 </div>
