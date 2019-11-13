@@ -1,4 +1,11 @@
 <?php
+// a database based universal searcher that keeps track of all your searches
+// Allows export and import of search engines
+// allows editing and deletion of search engines
+// has pure url search option
+// can hide NSFW results from home page
+// has get url parameter auto generated as you type
+// suggest searches as you type, based on old searches
 include('connect-db.php');
 
 /** AJAX SCRIPTS */

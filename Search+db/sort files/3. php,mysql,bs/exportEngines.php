@@ -6,8 +6,8 @@ header('Content-type: text/html');
 ?>
 
 <!--
-This downloaded file has all the engines from the database.
-Click on an engine button to add it to the new installation
+This downloaded file has all the engines from the database you exported.
+Click on an engine button to add it to your new installation
 -->
 <!doctype html>
 <html lang="en">

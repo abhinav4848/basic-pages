@@ -237,11 +237,11 @@
          }
          /*echo var_dump($_POST);
 
-         Make a link
+        Make a link
 
-if (substr('ab_123456789', 0, 3) === 'ab_')
-https://stackoverflow.com/questions/3282812/how-to-check-the-first-three-characters-in-a-variable*/
-         ?>
+        if (substr('ab_123456789', 0, 3) === 'ab_')
+        https://stackoverflow.com/questions/3282812/how-to-check-the-first-three-characters-in-a-variable*/
+    ?>
 </body>
 
 </html>
