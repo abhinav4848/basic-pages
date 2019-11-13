@@ -3,14 +3,25 @@ include('connect-db.php');
 
 /** AJAX SCRIPTS */
 
-// Insert term into database
+// Insert search term into database
 if (array_key_exists('searchTerm', $_POST) and $_POST['searchTerm']!='' and array_key_exists('submit', $_POST)) {
-    $query = "INSERT INTO `searcher_searches` (`searchTerm`, `engine`, `datetime`, `searcher`)
+    if (filter_var($_POST['searchTerm'], FILTER_VALIDATE_URL)) {
+        // if the searchTerm is a url, save it without engine details
+        $query = "INSERT INTO `searcher_searches` (`searchTerm`, `engine`, `datetime`, `searcher`)
+        VALUES (
+        '".mysqli_real_escape_string($link, $_POST['searchTerm'])."',
+        '',
+        '".date('Y-m-d H:i:s')."',
+        '1');";
+    } else {
+        // else include the engine info as well
+        $query = "INSERT INTO `searcher_searches` (`searchTerm`, `engine`, `datetime`, `searcher`)
         VALUES (
         '".mysqli_real_escape_string($link, $_POST['searchTerm'])."',
         '".mysqli_real_escape_string($link, $_POST['engine'])."',
         '".date('Y-m-d H:i:s')."',
         '1');";
+    }
 
     if (mysqli_query($link, $query)) {
         echo 'data inserted';
@@ -445,7 +456,13 @@ if (array_key_exists('changeEngine', $_POST)) {
                     submit: 'submit'
                 },
                 success: function(data) {
-                    openup(engine, searchTerm);
+                    if (isValidURL(searchTerm)) {
+                        // if the searchTerm is a url, open it directly
+                        open(searchTerm)
+                    } else {
+                        // else send it to function openup() which runs correct engine url
+                        openup(engine, searchTerm);
+                    }
                 }
             });
         } else {
@@ -459,6 +476,14 @@ if (array_key_exists('changeEngine', $_POST)) {
         }
 
     });
+
+    //check if the string is valid url
+    //https://stackoverflow.com/a/49849482/2365231
+    function isValidURL(string) {
+        var res = string.match(
+            /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+        return (res !== null)
+    };
 
     // delete history
     $(".delete_history").click(function(e) {
