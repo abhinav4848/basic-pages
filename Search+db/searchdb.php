@@ -5,23 +5,12 @@ include('connect-db.php');
 
 // Insert search term into database
 if (array_key_exists('searchTerm', $_POST) and $_POST['searchTerm']!='' and array_key_exists('submit', $_POST)) {
-    if (filter_var($_POST['searchTerm'], FILTER_VALIDATE_URL)) {
-        // if the searchTerm is a url, save it without engine details
-        $query = "INSERT INTO `searcher_searches` (`searchTerm`, `engine`, `datetime`, `searcher`)
-        VALUES (
-        '".mysqli_real_escape_string($link, $_POST['searchTerm'])."',
-        '',
-        '".date('Y-m-d H:i:s')."',
-        '1');";
-    } else {
-        // else include the engine info as well
-        $query = "INSERT INTO `searcher_searches` (`searchTerm`, `engine`, `datetime`, `searcher`)
+    $query = "INSERT INTO `searcher_searches` (`searchTerm`, `engine`, `datetime`, `searcher`)
         VALUES (
         '".mysqli_real_escape_string($link, $_POST['searchTerm'])."',
         '".mysqli_real_escape_string($link, $_POST['engine'])."',
         '".date('Y-m-d H:i:s')."',
         '1');";
-    }
 
     if (mysqli_query($link, $query)) {
         echo 'data inserted';
@@ -50,13 +39,19 @@ if (array_key_exists('searchTerm', $_POST)) {
 }
 
 // add new engine
-if (array_key_exists('sitename', $_POST) and $_POST['sitename']!='' and
+if ((array_key_exists('sitename', $_POST) and $_POST['sitename']!='' and
 array_key_exists('identifier', $_POST) and $_POST['identifier']!='' and
-array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') {
+array_key_exists('urlprefix', $_POST) and $_POST['urlprefix']!='') or
+(array_key_exists('sitename', $_POST) and $_POST['sitename']!='' and
+array_key_exists('identifier', $_POST) and
+($_POST['identifier']=='pureURL' or
+$_POST['identifier']=='pureURL NSFW'))) {
+    // either all 3 parameters are present
+    // or sitename is present and identifier is one of the two options
     $query_CheckUnique = "SELECT * FROM `searcher_engines` WHERE identifier='".mysqli_real_escape_string($link, $_POST['identifier'])."' LIMIT 1";
     $result_CheckUnique = mysqli_query($link, $query_CheckUnique);
 
-    if ($result_CheckUnique == false) {
+    if (mysqli_num_rows($result_CheckUnique) > 0) {
         echo 'That engine already exists';
     } else {
         $query_insertEngine = "INSERT INTO `searcher_engines` (`site name`, `identifier`, `url-prefix`, `url-suffix`, `baseurl`, `nsfw`)
@@ -202,6 +197,10 @@ if (array_key_exists('changeEngine', $_POST)) {
 <body>
     <div class="container">
         <h1>Smart Search</h1>
+        <a href="defaultEngines.php">Install default Engines</a> |
+        <a href="exportEngines.php" onclick="alert('upload the html file to home directory and visit it')">Export all
+            engines</a> |
+        <a href="exportedEngines.html">Visit exported file</a>
 
         <form class="form-inline" method="get" id="searchForm">
 
@@ -283,7 +282,6 @@ if (array_key_exists('changeEngine', $_POST)) {
         to-do:
         - Change the engine as well when clicking on link
         - Export and import engines
-        - Store a search url in pure form into the history, without searching for it in an engine
         </pre>
         <h3>History</h3>
         <p class="small">
@@ -456,13 +454,7 @@ if (array_key_exists('changeEngine', $_POST)) {
                     submit: 'submit'
                 },
                 success: function(data) {
-                    if (isValidURL(searchTerm)) {
-                        // if the searchTerm is a url, open it directly
-                        open(searchTerm)
-                    } else {
-                        // else send it to function openup() which runs correct engine url
-                        openup(engine, searchTerm);
-                    }
+                    openup(engine, searchTerm);
                 }
             });
         } else {
@@ -476,14 +468,6 @@ if (array_key_exists('changeEngine', $_POST)) {
         }
 
     });
-
-    //check if the string is valid url
-    //https://stackoverflow.com/a/49849482/2365231
-    function isValidURL(string) {
-        var res = string.match(
-            /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
-        return (res !== null)
-    };
 
     // delete history
     $(".delete_history").click(function(e) {
