@@ -126,11 +126,11 @@ if (array_key_exists('changeEngine', $_POST)) {
         if (mysqli_num_rows($result) > 0) {
             $row = mysqli_fetch_assoc($result);
 
-            // set the engine to hidden, and free up the identifier column, but remember it as old-identifier
+            // set the engine to hidden, and free up the identifier column (by inserting a random string), but remember it as old-identifier
             $query = "UPDATE `searcher_engines` SET
             `hidden` = 1,
             `old-identifier` = '".mysqli_real_escape_string($link, $row['identifier'])."',
-            `identifier` = ''
+            `identifier` = '".bin2hex(random_bytes('15'))."'
             WHERE id = ".mysqli_real_escape_string($link, $_POST['id'])." LIMIT 1";
 
             if (mysqli_query($link, $query)) {
@@ -205,6 +205,36 @@ if (array_key_exists('changeEngine', $_POST)) {
         /* Bootstrap table colour*/
         background-color: rgba(0, 0, 0, .05)
     }
+
+    li {
+        /* These are technically the same, but use both */
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+
+        -ms-word-break: break-all;
+        /* This is the dangerous one in WebKit, as it breaks things wherever */
+        word-break: break-all;
+        /* Instead use this non-standard one: */
+        word-break: break-word;
+
+        /* Adds a hyphen where the word breaks, if supported (No Blink) */
+        -ms-hyphens: auto;
+        -moz-hyphens: auto;
+        -webkit-hyphens: auto;
+        hyphens: auto;
+    }
+
+    @media only screen and (max-width: 600px) {
+        ol {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #openurl {
+            margin-top: 2px;
+        }
+    }
     </style>
 
     <title>Search Stuff</title>
@@ -239,7 +269,7 @@ if (array_key_exists('changeEngine', $_POST)) {
                         </select>
                     </div>
 
-                    <div class="form-group mx-sm-3 mx-2">
+                    <div class="form-group mx-sm-3">
                         <input autofocus type="search" size="50" name="searchTerm" class="form-control" id="searchField"
                             autocomplete="off" wid placeholder="Enter search term here" <?php
                             if (array_key_exists('searchTerm', $_GET)) {
@@ -249,10 +279,10 @@ if (array_key_exists('changeEngine', $_POST)) {
                     </div>
 
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary mx-2">Submit</button>
-                        <span class="btn btn-primary mx-2" id="edit-engine"><i class="fas fa-edit"></i> Edit
+                        <button type="submit" class="btn btn-primary mx-1">Submit</button>
+                        <span class="btn btn-primary mx-1" id="edit-engine"><i class="fas fa-edit"></i> Edit
                             Engine</span>
-                        <span class="btn btn-primary mx-2" id="openurl"
+                        <span class="btn btn-primary mx-1" id="openurl"
                             onclick="window.open(document.getElementById('engine').options[document.getElementById('engine').selectedIndex].getAttribute('data-url'))"><i
                                 class="fas fa-globe"></i></span>
                     </div>
@@ -619,11 +649,17 @@ if (array_key_exists('changeEngine', $_POST)) {
             success: function(data) {
                 console.log(data)
                 if (data == 'success') {
-                    modal.modal('hide')
+                    modal.modal('hide');
+
                     document.getElementById('success').style.display = 'block';
-                    $("#success").html(data)
+                    $("#success").html(data + '...Reloading Page');
+
                     window.setTimeout(() => {
+                            //hide the success box
                             document.getElementById('success').style.display = 'none';
+                            // to prevent attempt at re-deleting an engine, 
+                            // which might cause overwriting of old-identifier
+                            window.location.reload();
                         },
                         3000);
                 } else {
