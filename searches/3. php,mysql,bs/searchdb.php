@@ -34,12 +34,11 @@ if (array_key_exists('searchTerm', $_POST)) {
 
         $result = mysqli_query($link, $query);
         if (mysqli_num_rows($result) > 0) {
-            echo '<ul>';
             while ($row = mysqli_fetch_array($result)) {
-                $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'; $('#searchField').keyup()";
+                //insert the search term into box, focus the box, simulate a keyup() on the box
+                $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'; document.getElementById('searchField').focus(); searchField();";
                 echo '<li><label class="historyList" onclick="'.$onclickattribute.'"><span class="text-primary">'.$row['searchTerm'].'</span> <small><code>('.$row['engine'].')</code> (Date: '. date("d-M-Y h:i:s a", strtotime($row['datetime'])).')</small></label></li>';
             }
-            echo '</ul>';
         }
     }
     die();
@@ -192,9 +191,19 @@ if (array_key_exists('changeEngine', $_POST)) {
         color: red;
     }
 
+    /*restore the cancel button on searchbox that bootstrap breas*/
+    input[type="search"]::-webkit-search-cancel-button {
+        -webkit-appearance: searchfield-cancel-button;
+    }
+
     #error,
     #success {
         display: none;
+    }
+
+    .card-text li:nth-child(odd) {
+        /* Bootstrap table colour*/
+        background-color: rgba(0, 0, 0, .05)
     }
     </style>
 
@@ -203,138 +212,164 @@ if (array_key_exists('changeEngine', $_POST)) {
 
 <body>
     <div class="container">
+
         <h1>Smart Search</h1>
         <a href="defaultEngines.php">Install default Engines</a> |
         <a href="exportEngines.php" onclick="alert('upload the html file to home directory and visit it')">Export all
             engines</a> |
         <a href="exportedEngines.html">Visit exported file</a>
 
-        <form class="form-inline" method="get" id="searchForm">
+        <div class="card my-1" style="width: 100%;">
+            <div class="card-body">
+                <h5 class="card-title">Search</h5>
+                <form class="form-inline" method="get" id="searchForm">
 
-            <select name="engine" class="form-control" id="engine">
-                <?php
-                    $query_engines = "SELECT * FROM `searcher_engines` WHERE `hidden`=0";
-                    $result_engines = mysqli_query($link, $query_engines);
-                    while ($row_engines = mysqli_fetch_array($result_engines)) {
-                        $identifier=$row_engines['identifier'];
-                        $sitename = $row_engines['site name'];
-                        $baseurl = $row_engines['baseurl'];
-                        echo "<option value='".$identifier."' data-url='".$baseurl."'>".$sitename." (".$identifier.")</option>";
-                    }
-                ?>
-            </select>
+                    <div class="form-group">
+                        <select name="engine" class="form-control" id="engine">
+                            <?php
+                                $query_engines = "SELECT * FROM `searcher_engines` WHERE `hidden`=0";
+                                $result_engines = mysqli_query($link, $query_engines);
+                                while ($row_engines = mysqli_fetch_array($result_engines)) {
+                                    $identifier=$row_engines['identifier'];
+                                    $sitename = $row_engines['site name'];
+                                    $baseurl = $row_engines['baseurl'];
+                                    echo "<option value='".$identifier."' data-url='".$baseurl."'>".$sitename." (".$identifier.")</option>";
+                                }
+                            ?>
+                        </select>
+                    </div>
 
-            <div class="form-group mx-sm-3 mx-2">
-                <input type="text" name="searchTerm" class="form-control" id="searchField" autocomplete="off"
-                    placeholder="Enter search term here" <?php
-                if (array_key_exists('searchTerm', $_GET)) {
-                    echo 'value="'.$_GET['searchTerm'].'"';
-                }
-                ?>>
-            </div>
+                    <div class="form-group mx-sm-3 mx-2">
+                        <input autofocus type="search" size="50" name="searchTerm" class="form-control" id="searchField"
+                            autocomplete="off" wid placeholder="Enter search term here" <?php
+                            if (array_key_exists('searchTerm', $_GET)) {
+                                echo 'value="'.$_GET['searchTerm'].'"';
+                            }
+                            ?>>
+                    </div>
 
-            <button type="submit" class="btn btn-primary mx-2">Submit</button>
-            <span class="btn btn-primary mx-2" id="edit-engine"><i class="fas fa-edit"></i> Edit Engine</span>
-            <span class="btn btn-primary mx-2" id="openurl"
-                onclick="window.open(document.getElementById('engine').options[document.getElementById('engine').selectedIndex].getAttribute('data-url'))"><i
-                    class="fas fa-globe"></i></span>
-        </form>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary mx-2">Submit</button>
+                        <span class="btn btn-primary mx-2" id="edit-engine"><i class="fas fa-edit"></i> Edit
+                            Engine</span>
+                        <span class="btn btn-primary mx-2" id="openurl"
+                            onclick="window.open(document.getElementById('engine').options[document.getElementById('engine').selectedIndex].getAttribute('data-url'))"><i
+                                class="fas fa-globe"></i></span>
+                    </div>
+                </form>
 
-
-        <div id="results">
-            <!-- Search results are displayed by ajax here-->
-        </div>
+                <ol class="card-text" id="results">
+                    <!-- Search results are displayed by ajax here-->
+                </ol>
+            </div> <!-- /.card-body -->
+        </div> <!-- /.card -->
 
         <div class="alert alert-danger fade show mt-2" id="error"> </div>
         <div class="alert alert-success fade show mt-2" id="success"> </div>
 
-        <div id="newengine">
-            <h3>New Engine Maker</h3>
+        <div class="card" id="newengine" style="width: 100%;">
+            <div class="card-body">
+                <h5 class="card-title">New Engine Maker</h5>
+                <form class="form-inline" id="newEngineMake">
+                    <div class="form-group mr-sm-3 mb-2">
+                        <input type="text" name="sitename" id="sitename" class="form-control" placeholder="Site Name">
+                    </div>
 
-            <form class="form-inline" id="newEngineMake">
-                <div class="form-group mr-sm-3 mb-2">
-                    <input type="text" name="sitename" id="sitename" class="form-control" placeholder="Site Name">
-                </div>
+                    <div class="form-group mr-sm-3 mb-2">
+                        <input type="text" name="identifier" id="identifier" class="form-control"
+                            placeholder="Unique Identifier">
+                    </div>
 
-                <div class="form-group mr-sm-3 mb-2">
-                    <input type="text" name="identifier" id="identifier" class="form-control"
-                        placeholder="Unique Identifier">
-                </div>
+                    <div class="form-group mr-sm-3 mb-2">
+                        <input type="text" name="urlprefix" id="urlprefix" class="form-control"
+                            placeholder="URL Prefix">
+                    </div>
 
-                <div class="form-group mr-sm-3 mb-2">
-                    <input type="text" name="urlprefix" id="urlprefix" class="form-control" placeholder="URL Prefix">
-                </div>
+                    <div class="form-group mr-sm-3 mb-2">
+                        <input type="text" name="urlsuffix" id="urlsuffix" class="form-control"
+                            placeholder="URL Suffix">
+                    </div>
 
-                <div class="form-group mr-sm-3 mb-2">
-                    <input type="text" name="urlsuffix" id="urlsuffix" class="form-control" placeholder="URL Suffix">
-                </div>
+                    <div class="form-group mr-sm-3 mb-2">
+                        <input type="text" name="baseurl" id="baseurl" class="form-control" placeholder="Base URL">
+                    </div>
 
-                <div class="form-group mr-sm-3 mb-2">
-                    <input type="text" name="baseurl" id="baseurl" class="form-control" placeholder="Base URL">
-                </div>
+                    <div class="form-group mr-sm-3 mb-2">
+                        <select name="nsfw" id="nsfw" class="form-control">
+                            <option value="0" hidden>NSFW?</option>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
 
-                <div class="form-group mr-sm-3 mb-2">
-                    <select name="nsfw" id="nsfw" class="form-control">
-                        <option value="0" hidden>NSFW?</option>
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </select>
-                </div>
+                    <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                </form>
 
-                <button type="submit" class="btn btn-primary mb-2">Submit</button>
-            </form>
+            </div><!-- /.card-body -->
+        </div><!-- /.card -->
 
-        </div>
-        <pre>
-        to-do:
-        - Change the engine as well when clicking on link
-        - Export and import engines
-        </pre>
-        <h3>History</h3>
-        <p class="small">
-            <a href="?filter=sfw-only">SFW</a> |
-            <a href="?filter=nsfw-only">NSFW</a> |
-            <a href="?filter=all">All</a>
-        </p>
-        <ol>
-            <?php
-                $query = "SELECT *, searcher_searches.id AS searchID FROM `searcher_searches` INNER JOIN `searcher_engines` ON searcher_searches.engine = searcher_engines.identifier";
-                
-                if (array_key_exists('filter', $_GET)) {
-                    if ($_GET['filter'] == 'sfw-only') {
-                        $query.= " AND searcher_engines.nsfw='0'";
-                    }
-                    if ($_GET['filter'] == 'nsfw-only') {
-                        $query.= " AND searcher_engines.nsfw='1'";
-                    }
-                    if ($_GET['filter'] == 'all') {
-                        $query.= "";
-                    }
-                } else {
-                    $query.= " AND searcher_engines.nsfw='0'";
-                }
-                
-                $query.=" ORDER BY searcher_searches.id DESC LIMIT 100";
-                $result = mysqli_query($link, $query);
-                while ($row = mysqli_fetch_assoc($result)) {
-                    // echo '<pre>';
-                    // echo $query.'<br />';
-                    // print_r($row);
-                    // echo '</pre>';
-                    $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'; document.getElementById('searchField').focus(); $('#searchField').keyup()";
-                    
-                    echo '<li>
-                    <label class="historyList" onclick="'.$onclickattribute.'">
-                    <span class="text-primary">'.$row['searchTerm'].'</span>
-                    <small> <code>('.$row['engine'].')</code> (Date: '. date("d-M-Y h:i:s a", strtotime($row['datetime'])).')</small>
-                    </label> 
-                    <a href="#" class="delete_history" data-id="'.$row['searchID'].'">
-                    <i class="far fa-trash-alt"></i>
-                    </a>
-                    </li>';
-                }
-            ?>
-        </ol>
+        <pre>to-do:
+- Change the engine as well when clicking on link</pre>
+        <!-- - <s>Store a search url in pure form into the history, without searching for it in an engine</s>
+        - <s>Export and import engines</s>
+        - <s>Delete Engine</s>
+        - <s>Include search term in address bar to allow direct links</s>
+        - <s>Add ability to hide nsfw results</s>
+        - <s>Add ability to edit engines</s> -->
+
+        <div class="card my-1" style="width: 100%;">
+            <div class="card-body">
+                <h5 class="card-title">History</h5>
+                <p class="small">
+                    <a href="?filter=sfw-only">SFW</a> |
+                    <a href="?filter=nsfw-only">NSFW</a> |
+                    <a href="?filter=all">All</a>
+                </p>
+                <ol class="card-text">
+                    <?php
+                        $query = "SELECT *, searcher_searches.id AS searchID FROM `searcher_searches` INNER JOIN `searcher_engines` ON searcher_searches.engine = searcher_engines.identifier";
+                        
+                        if (array_key_exists('filter', $_GET)) {
+                            if ($_GET['filter'] == 'sfw-only') {
+                                $query.= " AND searcher_engines.nsfw='0'";
+                            }
+                            if ($_GET['filter'] == 'nsfw-only') {
+                                $query.= " AND searcher_engines.nsfw='1'";
+                            }
+                            if ($_GET['filter'] == 'all') {
+                                $query.= "";
+                            }
+                        } else {
+                            $query.= " AND searcher_engines.nsfw='0'";
+                        }
+                        
+                        $query.=" ORDER BY searcher_searches.id DESC LIMIT 100";
+                        $result = mysqli_query($link, $query);
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            // echo '<pre>';
+                            // echo $query.'<br />';
+                            // print_r($row);
+                            // echo '</pre>';
+                            $onclickattribute = "document.getElementById('searchField').value ='".$row['searchTerm']."'; document.getElementById('searchField').focus(); searchField();";
+                            
+                            echo '<li>
+                            <label class="historyList" onclick="'.$onclickattribute.'">
+                            <span class="text-primary">'.$row['searchTerm'].'</span>
+                            <small> <code>('.$row['engine'].')</code> (Date: '. date("d-M-Y h:i:s a", strtotime($row['datetime'])).')</small>
+                            </label> 
+                            <a href="#" class="delete_history" data-id="'.$row['searchID'].'">
+                            <i class="far fa-trash-alt"></i>
+                            </a>
+                            </li>';
+                        }
+                    ?>
+                </ol>
+            </div> <!-- /.card-body -->
+        </div> <!-- /.card -->
+
+        <h3></h3>
+
+
     </div>
 
     <!-- Optional JavaScript -->
@@ -357,18 +392,20 @@ if (array_key_exists('changeEngine', $_POST)) {
         searchField();
     };
 
-    //Searches with instant database results
-    $("#searchField").keyup(searchField);
+    // Searches with instant database results
+    // if any key is entered, fire searchField()
+    document.querySelector('#searchField').addEventListener('keyup', searchField, false);
+    // if the "x" button is clicked on search box, fire searchField()
+    document.querySelector('#searchField').addEventListener("search", searchField, false);
 
     function searchField() {
         var searchTerm = $("#searchField").val();
+        console.log(searchTerm)
 
         if (document.title != searchTerm && searchTerm != '') {
             var engine = $("#engine").val();
-
             document.title = 'SearchStuff: (' + engine + ')  ' + searchTerm;
             window.history.replaceState('', '', window.location.pathname + '?search=' + searchTerm);
-
         } else {
             document.title = 'SearchStuff!';
             window.history.pushState('', '', window.location.pathname);
@@ -382,7 +419,6 @@ if (array_key_exists('changeEngine', $_POST)) {
             },
             success: function(result) {
                 if (result != '') {
-
                     $("#results").show();
                     $("#results").html("<b>Results</b>:<br/>" + result);
                 } else {
